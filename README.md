@@ -71,10 +71,13 @@ Second parameter to `cabotZombie` call is an object that can override some funct
 cabotZombie(config, {
   // customize service name. `data` contains data about the current service
   resolveServiceName: (data) => { ... },
+
   // customize service name. `data` contains data about the current service and instance
   resolveInstanceName: (data) => { ... },
+
   // customize service name. `data` contains data about the current service, instance and check
   resolveCheckName: (data) => { ... },
+
   // customize matching the check names to be added to a service. This is used when Zombie.js has to select the checks that are part of a service.
   customCheckNameMatcher: (checkName, data) => { ... },
 })
