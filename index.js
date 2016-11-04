@@ -42,32 +42,34 @@ const createServiceInstances = (browser, data, options) => {
   }))
 }
 
-const createServices = (browser, data, options) => {
+const createServices = (config, data, options) => {
   return Promise.all(data.services.map((service, serviceIndex) => {
+    const browser = new Browser()
     const serviceData = {
       service,
       serviceIndex,
     }
-    return createServiceInstances(browser, serviceData, options)
-      .then(() => createService(browser, serviceData, options))
+
+    return login(browser, config.credentials)
+      .then(() => {
+        return createServiceInstances(browser, serviceData, options)
+          .then(() => createService(browser, serviceData, options))
+      })
+      .catch((e) => {
+        // this error happens in the page Javascript when we enter in /services without any service
+        if (e.message === 'Cannot read property \'asSorting\' of undefined') {
+          return createServiceInstances(browser, serviceData, options)
+            .then(() => createService(browser, serviceData, options))
+        }
+        throw new Error(e)
+      })
+
   }))
 }
 
 const cabotZombie = (config, options) => {
   globalConfig.baseUrl = config.baseUrl
-  const browser = new Browser()
-
-  return login(browser, config.credentials)
-    .then(() => {
-      return createServices(browser, config.data, options)
-    })
-    .catch((e) => {
-      // this error happens in the page Javascript when we enter in /services without any service
-      if (e.message === 'Cannot read property \'asSorting\' of undefined') {
-        return createServices(browser, config.data, options)
-      }
-      throw new Error(e)
-    })
+  return createServices(config, config.data, options)
 }
 
 module.exports = cabotZombie
