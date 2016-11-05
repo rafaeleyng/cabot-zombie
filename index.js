@@ -63,7 +63,6 @@ const createServices = (config, data, options) => {
         }
         throw new Error(e)
       })
-
   }))
 }
 
