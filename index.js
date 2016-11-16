@@ -42,15 +42,23 @@ const createServiceInstances = (browser, data, options) => {
   }))
 }
 
-const createServices = (config, data, options) => {
-  return Promise.all(data.services.map((service, serviceIndex) => {
+const loginAndCreateServices = (config, data, options) => {
+  let resolvePromise
+  const promise = new Promise(resolve => {
+    resolvePromise = resolve
+  })
+
+  const services = data.services
+  let currentServiceIndex = 0
+
+  const loginAndCreateService = (service, serviceIndex) => {
     const browser = new Browser()
     const serviceData = {
       service,
       serviceIndex,
     }
 
-    return login(browser, config.credentials)
+    login(browser, config.credentials)
       .then(() => {
         return createServiceInstances(browser, serviceData, options)
           .then(() => createService(browser, serviceData, options))
@@ -63,12 +71,24 @@ const createServices = (config, data, options) => {
         }
         throw new Error(e)
       })
-  }))
+      .then(() => {
+        currentServiceIndex++
+        if (services[currentServiceIndex]) {
+          loginAndCreateService(services[currentServiceIndex], currentServiceIndex)
+        } else {
+          resolvePromise()
+        }
+      })
+  }
+
+  loginAndCreateService(services[currentServiceIndex], currentServiceIndex)
+
+  return promise
 }
 
 const cabotZombie = (config, options) => {
   globalConfig.baseUrl = config.baseUrl
-  return createServices(config, config.data, options)
+  return loginAndCreateServices(config, config.data, options)
 }
 
 module.exports = cabotZombie
