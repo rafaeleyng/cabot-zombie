@@ -42,32 +42,53 @@ const createServiceInstances = (browser, data, options) => {
   }))
 }
 
-const createServices = (browser, data, options) => {
-  return Promise.all(data.services.map((service, serviceIndex) => {
+const loginAndCreateServices = (config, data, options) => {
+  let resolvePromise
+  const promise = new Promise(resolve => {
+    resolvePromise = resolve
+  })
+
+  const services = data.services
+  let currentServiceIndex = 0
+
+  const loginAndCreateService = (service, serviceIndex) => {
+    const browser = new Browser()
     const serviceData = {
       service,
       serviceIndex,
     }
-    return createServiceInstances(browser, serviceData, options)
-      .then(() => createService(browser, serviceData, options))
-  }))
+
+    login(browser, config.credentials)
+      .then(() => {
+        return createServiceInstances(browser, serviceData, options)
+          .then(() => createService(browser, serviceData, options))
+      })
+      .catch((e) => {
+        // this error happens in the page Javascript when we enter in /services without any service
+        if (e.message === 'Cannot read property \'asSorting\' of undefined') {
+          return createServiceInstances(browser, serviceData, options)
+            .then(() => createService(browser, serviceData, options))
+        }
+        throw new Error(e)
+      })
+      .then(() => {
+        currentServiceIndex++
+        if (services[currentServiceIndex]) {
+          loginAndCreateService(services[currentServiceIndex], currentServiceIndex)
+        } else {
+          resolvePromise()
+        }
+      })
+  }
+
+  loginAndCreateService(services[currentServiceIndex], currentServiceIndex)
+
+  return promise
 }
 
 const cabotZombie = (config, options) => {
   globalConfig.baseUrl = config.baseUrl
-  const browser = new Browser()
-
-  return login(browser, config.credentials)
-    .then(() => {
-      return createServices(browser, config.data, options)
-    })
-    .catch((e) => {
-      // this error happens in the page Javascript when we enter in /services without any service
-      if (e.message === 'Cannot read property \'asSorting\' of undefined') {
-        return createServices(browser, config.data, options)
-      }
-      throw new Error(e)
-    })
+  return loginAndCreateServices(config, config.data, options)
 }
 
 module.exports = cabotZombie
