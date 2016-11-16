@@ -43,11 +43,12 @@ module.exports = {
                 type: 'http',
                 endpoint: 'http://my-host-a/my-page',
                 textMatch: 'my page should contain this',
+                frequency: 1, # minute - default is 5 minutes
               },
             ],
           },
           {
-          address: 'my-host-b',
+            address: 'my-host-b',
             checks: [
               {
                 type: 'http',
@@ -82,3 +83,13 @@ cabotZombie(config, {
   customCheckNameMatcher: (checkName, data) => { ... },
 })
 ```
+
+## Contributing
+
+cabot-zombie fits perfectly the configuration that I want to do, but it isn't very generic.
+
+Any pull requests in that sense would be greatly appreciated.
+
+## License
+
+MIT

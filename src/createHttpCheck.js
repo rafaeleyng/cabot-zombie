@@ -16,7 +16,7 @@ const createHttpCheck = (browser, data, options) => {
         .fill('name', checkName)
         .fill('endpoint', check.endpoint)
         .fill('text_match', check.textMatch || '')
-        .fill('frequency', check.frequency || 4)
+        .fill('frequency', check.frequency || 5)
         .click('#id_instance_set_chosen ul')
         .then(() => {
 
