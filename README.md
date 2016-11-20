@@ -1,5 +1,7 @@
 # cabot-zombie
 
+Automate your configuration of Cabot monitoring.
+
 [Cabot](http://cabotapp.com/) is a self-hosted monitoring and alert service. But unfortunately it lacks an HTTP API to automate configuration.
 
 cabot-zombie runs a headless browser (Zombie.js) that creates your configuration based on a simple Javascript object.
