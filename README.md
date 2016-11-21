@@ -86,6 +86,40 @@ cabotZombie(config, {
 })
 ```
 
+For instance, I use these options like this:
+
+```
+const resolveServiceName = (data) => {
+  const service = data.service
+  return `${service.env}-${service.name}-service`
+}
+
+const resolveInstanceName = (data) => {
+  return `${resolveServiceName(data)}-instance-${data.instanceIndex}`
+}
+
+const resolveCheckName = (data) => {
+  return `${resolveInstanceName(data)}-check-${data.check.type}-${data.checkIndex}`
+}
+
+// use this to make the Zombie check the default ping check for each instance when checking all the checks for a service
+const customCheckNameMatcher = (checkName, data) => {
+  return checkName === `Default Ping Check for ${resolveInstanceName(data)}`
+}
+
+const options = {
+  resolveServiceName,
+  resolveInstanceName,
+  resolveCheckName,
+  customCheckNameMatcher,
+}
+
+const main = () => {
+  cabotZombie(config, options)
+    .then(() => console.log('All set up!'))
+}
+```
+
 ## Contributing
 
 cabot-zombie fits perfectly the configuration that I want to do, but it isn't very generic.
