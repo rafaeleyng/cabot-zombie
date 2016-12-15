@@ -30,16 +30,37 @@ const createInstanceChecks = (browser, data, options) => {
 }
 
 const createServiceInstances = (browser, data, options) => {
-  return Promise.all(data.service.instances.map((instance, instanceIndex) => {
+  let resolvePromise
+  const promise = new Promise(resolve => {
+    resolvePromise = resolve
+  })
+
+  const instances = data.service.instances
+  let currentInstanceIndex = 0
+
+  const createInstanceSequentially = (instance, instanceIndex) => {
     const instanceData = {
       service: data.service,
       serviceIndex: data.serviceIndex,
       instance,
       instanceIndex,
     }
-    return createInstance(browser, instanceData, options)
+
+    createInstance(browser, instanceData, options)
       .then(() => createInstanceChecks(browser, instanceData, options))
-  }))
+      .then(() => {
+        currentInstanceIndex++
+        if (instances[currentInstanceIndex]) {
+          createInstanceSequentially(instances[currentInstanceIndex], currentInstanceIndex)
+        } else {
+          resolvePromise()
+        }
+      })
+  }
+
+  createInstanceSequentially(instances[currentInstanceIndex], currentInstanceIndex)
+
+  return promise
 }
 
 const loginAndCreateServices = (config, data, options) => {
@@ -51,7 +72,7 @@ const loginAndCreateServices = (config, data, options) => {
   const services = data.services
   let currentServiceIndex = 0
 
-  const loginAndCreateService = (service, serviceIndex) => {
+  const loginAndCreateServiceSequentially = (service, serviceIndex) => {
     const browser = new Browser()
     const serviceData = {
       service,
@@ -74,14 +95,14 @@ const loginAndCreateServices = (config, data, options) => {
       .then(() => {
         currentServiceIndex++
         if (services[currentServiceIndex]) {
-          loginAndCreateService(services[currentServiceIndex], currentServiceIndex)
+          loginAndCreateServiceSequentially(services[currentServiceIndex], currentServiceIndex)
         } else {
           resolvePromise()
         }
       })
   }
 
-  loginAndCreateService(services[currentServiceIndex], currentServiceIndex)
+  loginAndCreateServiceSequentially(services[currentServiceIndex], currentServiceIndex)
 
   return promise
 }
