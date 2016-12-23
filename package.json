@@ -1,6 +1,6 @@
 {
   "name": "cabot-zombie",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Automate your configuration of Cabot monitoring",
   "main": "index.js",
   "dependencies": {
