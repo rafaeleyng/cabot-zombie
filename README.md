@@ -1,5 +1,11 @@
 # cabot-zombie
 
+## DEPRECATED
+
+This is deprecated in favor of [cabot-db-config](https://www.npmjs.com/package/cabot-db-config), which is way faster and more reliable.
+
+---
+
 Automate your configuration of Cabot monitoring.
 
 [Cabot](http://cabotapp.com/) is a self-hosted monitoring and alert service. But unfortunately it lacks an HTTP API to automate configuration.
